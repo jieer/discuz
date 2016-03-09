@@ -117,7 +117,10 @@ function writetocsscache($data) {
 					}
 				}
 			}
-			$cssdata = preg_replace("/\{([A-Z0-9]+)\}/e", '\$data[strtolower(\'\1\')]', $cssdata);
+
+			writetocsscache_callback_1a($data, 1);
+
+			$cssdata = preg_replace_callback("/\{([A-Z0-9]+)\}/", 'writetocsscache_callback_1a', $cssdata);
 			$cssdata = preg_replace("/<\?.+?\?>\s*/", '', $cssdata);
 			$cssdata = !preg_match('/^http:\/\//i', $data['styleimgdir']) ? preg_replace("/url\(([\"'])?".preg_quote($data['styleimgdir'], '/')."/i", "url(\\1$_G[siteurl]$data[styleimgdir]", $cssdata) : $cssdata;
 			$cssdata = !preg_match('/^http:\/\//i', $data['imgdir']) ? preg_replace("/url\(([\"'])?".preg_quote($data['imgdir'], '/')."/i", "url(\\1$_G[siteurl]$data[imgdir]", $cssdata) : $cssdata;
@@ -136,4 +139,13 @@ function writetocsscache($data) {
 	}
 }
 
+function writetocsscache_callback_1a($matches, $action = 0) {
+	static $data = null;
+
+	if($action == 1) {
+		$data = $matches;
+	} else {
+		return $data[strtolower($matches[1])];
+	}
+}
 ?>

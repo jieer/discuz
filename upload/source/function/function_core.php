@@ -1164,7 +1164,7 @@ function hookscript($script, $hscript, $type = 'funcs', $param = array(), $func 
 					if(!method_exists($pluginclasses[$classkey], $hookfunc[1])) {
 						continue;
 					}
-					$return = $pluginclasses[$classkey]->$hookfunc[1]($param);
+					$return = call_user_func(array($pluginclasses[$classkey], $hookfunc[1]), $param);
 
 					if(substr($hookkey, -7) == '_extend' && !empty($_G['setting']['pluginhooks'][$hookkey])) {
 						continue;
@@ -2092,5 +2092,16 @@ function currentlang() {
 	}
 }
 
+if(PHP_VERSION < '7.0.0') {
+	function dpreg_replace($pattern, $replacement, $subject, $limit = -1, &$count) {
+		return preg_replace($pattern, $replacement, $subject, $limit, $count);
+	}
+	else {
+		function dpreg_replace($pattern, $replacement, $subject, $limit = -1, &$count) {
+			require_once libfile('function/preg');
+			return _dpreg_replace($pattern, $replacement, $subject, $limit, $count);
+		}
+	}
+}
 
 ?>
