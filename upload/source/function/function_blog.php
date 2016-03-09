@@ -71,13 +71,8 @@ function blog_post($POST, $olds=array()) {
 	} else {
 		$POST['message'] = getstr($POST['message'], 0, 0, 0, 0, 1);
 		$POST['message'] = censor($POST['message']);
-		$POST['message'] = preg_replace(array(
-			"/\<div\>\<\/div\>/i",
-			"/\<a\s+href\=\"([^\>]+?)\"\>/ie"
-		), array(
-			'',
-			'blog_check_url(\'\\1\')'
-		), $POST['message']);
+		$POST['message'] = preg_replace("/\<div\>\<\/div\>/i", '', $POST['message']);
+		$POST['message'] = preg_replace_callback("/\<a\s+href\=\"([^\>]+?)\"\>/i", 'blog_post_callback_blog_check_url_1', $POST['message']);
 	}
 	$message = $POST['message'];
 	if(censormod($message) || censormod($POST['subject']) || $_G['group']['allowblogmod']) {
@@ -268,6 +263,10 @@ function blog_post($POST, $olds=array()) {
 	return $blogarr;
 }
 
+function blog_post_callback_blog_check_url_1($matches) {
+	return blog_check_url($matches[1]);
+}
+
 function checkhtml($html) {
 	if(!checkperm('allowhtml')) {
 
@@ -313,9 +312,14 @@ function checkhtml($html) {
 }
 
 function blog_bbcode($message) {
-	$message = preg_replace("/\[flash\=?(media|real|mp3)*\](.+?)\[\/flash\]/ie", "blog_flash('\\2', '\\1')", $message);
+	$message = preg_replace_callback("/\[flash\=?(media|real|mp3)*\](.+?)\[\/flash\]/i", 'blog_bbcode_callback_blog_flash_21', $message);
 	return $message;
 }
+
+function blog_bbcode_callback_blog_flash_21($matches) {
+	return blog_flash($matches[2], $matches[1]);
+}
+
 function blog_flash($swf_url, $type='') {
 	$width = '520';
 	$height = '390';

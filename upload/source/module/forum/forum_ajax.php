@@ -290,7 +290,7 @@ if($_GET['action'] == 'checkusername') {
 			}
 			list($thread['subject'], $thread['author'], $thread['lastposter']) = daddslashes(array($thread['subject'], $thread['author'], $thread['lastposter']));
 			$thread['dateline'] = $thread['dateline'] > $todaytime ? "<span class=\"xi1\">".dgmdate($thread['dateline'], 'd')."</span>" : "<span>".dgmdate($thread['dateline'], 'd')."</span>";
-			$thread['lastpost'] = dgmdate($thread['lastpost']);
+			$thread['lastpost'] = dgmdate($thread['lastpost'], 'u');
 			if($forum_field['threadtypes']['prefix']) {
 				if($forum_field['threadtypes']['prefix'] == 1) {
 					$thread['threadtype'] = $forum_field['threadtypes']['types'][$thread['typeid']] ? '<em>[<a href="forum.php?mod=forumdisplay&fid='.$fid.'&filter=typeid&typeid='.$thread['typeid'].'">'.$forum_field['threadtypes']['types'][$thread['typeid']].'</a>]</em> ' : '' ;
@@ -530,8 +530,8 @@ EOF;
 					unset($list[$pid]);
 				} else {
 					$post['message'] = preg_replace($_G['cache']['smilies']['searcharray'], '', $post['message']);
-					$post['message'] = preg_replace("/\{\:soso_((e\d+)|(_\d+_\d))\:\}/e", '', $post['message']);
-					$list[$pid]['message'] = cutstr(preg_replace("/\[.+?\]/ies", '', dhtmlspecialchars($post['message'])), 300) ;
+					$post['message'] = preg_replace_callback("/\{\:soso_((e\d+)|(_\d+_\d))\:\}/", '', $post['message']);
+					$list[$pid]['message'] = cutstr(preg_replace_callback("/\[.+?\]/is", '', dhtmlspecialchars($post['message'])), 300) ;
 				}
 			}
 			krsort($list);

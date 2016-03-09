@@ -202,9 +202,20 @@ class Cloud_Service_Connect {
 			$attachIds[] = $aid;
 			$attachImages[] = $imageItem;
 		}
-		$content = preg_replace('/\[attach\](\d+)\[\/attach\]/ie', '$this->connectParseAttachTag(\\1, $attachNames)', $content);
+		$this->connectParseAttach_callback_connectParseAttachTag_1a($attachNames, 1);
+		$content = preg_replace_callback('/\[attach\](\d+)\[\/attach\]/i', array($this, 'connectParseAttach_callback_connectParseAttachTag_1a'), $content);
 
 		return $content;
+	}
+
+	public function connectParseAttach_callback_connectParseAttachTag_1a($matches, $action = 0) {
+		static $attachNames = '';
+
+		if($action == 1) {
+			$attachNames = $matches;
+		} else {
+			return $this->connectParseAttachTag($matches[1], $attachNames);
+		}
 	}
 
 	public function connectParseAttachTag($attachId, $attachNames) {

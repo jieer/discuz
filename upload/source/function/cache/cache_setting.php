@@ -271,8 +271,8 @@ function build_cache_setting() {
 			} else {
 				$data['watermarktext']['fontpath'][$k] = 'static/image/seccode/font/'.$data['watermarktext']['fontpath'][$k];
 			}
-			$data['watermarktext']['color'][$k] = preg_replace('/#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/e', "hexdec('\\1').','.hexdec('\\2').','.hexdec('\\3')", $data['watermarktext']['color'][$k]);
-			$data['watermarktext']['shadowcolor'][$k] = preg_replace('/#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/e', "hexdec('\\1').','.hexdec('\\2').','.hexdec('\\3')", $data['watermarktext']['shadowcolor'][$k]);
+			$data['watermarktext']['color'][$k] = preg_replace_callback('/#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/', 'build_cache_setting_callback_hexdec_123a', $data['watermarktext']['color'][$k]);
+			$data['watermarktext']['shadowcolor'][$k] = preg_replace_callback('/#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/', 'build_cache_setting_callback_hexdec_123a', $data['watermarktext']['shadowcolor'][$k]);
 		} else {
 			$data['watermarktext']['text'][$k] = '';
 			$data['watermarktext']['fontpath'][$k] = '';
@@ -384,9 +384,8 @@ function build_cache_setting() {
 	$data['homeshow'] = $data['uchomeurl'] && $data['uchome']['homeshow'] ? $data['uchome']['homeshow'] : '0';
 
 	unset($data['allowthreadplugin']);
-	if($data['jspath'] == 'data/cache/') {
-		writetojscache();
-	} elseif(!$data['jspath']) {
+	writetojscache();
+	if(!$data['jspath']) {
 		$data['jspath'] = 'static/js/';
 	}
 
@@ -448,19 +447,29 @@ function build_cache_setting() {
 		}
 		if($output['preg']) {
 			foreach($data['footernavs'] as $id => $nav) {
-				$data['footernavs'][$id]['code'] = preg_replace($output['preg']['search'], $output['preg']['replace'], $nav['code']);
+				foreach ($output['preg']['search'] as $key => $value) {
+					$data['footernavs'][$id]['code'] = preg_replace_callback($value, create_function('$matches', 'return '.$output['preg']['replace'][$key].';'), $nav['code']);
+				}
 			}
 			foreach($data['spacenavs'] as $id => $nav) {
-				$data['spacenavs'][$id]['code'] = preg_replace($output['preg']['search'], $output['preg']['replace'], $nav['code']);
+				foreach ($output['preg']['search'] as $key => $value) {
+					$data['spacenavs'][$id]['code'] = preg_replace_callback($value, create_function('$matches', 'return '.$output['preg']['replace'][$key].';'), $nav['code']);
+				}
 			}
 			foreach($data['mynavs'] as $id => $nav) {
-				$data['mynavs'][$id]['code'] = preg_replace($output['preg']['search'], $output['preg']['replace'], $nav['code']);
+				foreach ($output['preg']['search'] as $key => $value) {
+					$data['mynavs'][$id]['code'] = preg_replace_callback($value, create_function('$matches', 'return '.$output['preg']['replace'][$key].';'), $nav['code']);
+				}
 			}
 			foreach($data['topnavs'] as $id => $nav) {
-				$data['topnavs'][$id]['code'] = preg_replace($output['preg']['search'], $output['preg']['replace'], $nav['code']);
+				foreach ($output['preg']['search'] as $key => $value) {
+					$data['topnavs'][$id]['code'] = preg_replace_callback($value, create_function('$matches', 'return '.$output['preg']['replace'][$key].';'), $nav['code']);
+				}
 			}
 			foreach($data['plugins']['jsmenu'] as $key => $nav) {
-				$data['plugins']['jsmenu'][$key]['url'] = preg_replace($output['preg']['search'], $output['preg']['replace'], $nav['url']);
+				foreach ($output['preg']['search'] as $key => $value) {
+					$data['plugins']['jsmenu'][$key]['url'] = preg_replace_callback($value, create_function('$matches', 'return '.$output['preg']['replace'][$key].';'), $nav['url']);
+				}
 			}
 		}
 	}
@@ -469,6 +478,10 @@ function build_cache_setting() {
 
 	savecache('setting', $data);
 	$_G['setting'] = $data;
+}
+
+function build_cache_setting_callback_hexdec_123a($matches) {
+	return hexdec($matches[1]).','.hexdec($matches[2]).','.hexdec($matches[3]);
 }
 
 function get_cachedata_setting_creditspolicy() {
@@ -589,7 +602,9 @@ function get_cachedata_setting_plugin($method = '') {
 											$data['plugins']['profile_node'][$plugin['identifier']] = $script;
 										}
 									}
+									$funcname = str_replace('__', '#', $funcname);
 									$v = explode('_', $funcname);
+									$v[0] = str_replace('#', '_', $v[0]);
 									$curscript = $v[0];
 									if(!$curscript || $classname == $funcname) {
 										continue;
@@ -993,7 +1008,7 @@ function get_cachedata_threadprofile() {
 	}
 	foreach($data['template'] as $id => $template) {
 		foreach($template as $type => $row) {
-			$data['template'][$id][$type] = preg_replace('/\{([\w:]+)(=([^}]+?))?\}(([^}]+?)\{\*\}([^}]+?)\{\/\\1\})?/es', "get_cachedata_threadprofile_nodeparse(\$id, \$type, '\\1', '\\5', '\\6', '\\3')", $template[$type]);
+			$data['template'][$id][$type] = preg_replace_callback('/\{([\w:]+)(=([^}]+?))?\}(([^}]+?)\{\*\}([^}]+?)\{\/\\1\})?/s', create_function('$matches', 'return get_cachedata_threadprofile_nodeparse('.intval($id).', \''.addslashes($type).'\', $matches[1], $matches[5], $matches[6], $matches[3]);'), $template[$type]);
 		}
 	}
 	$data['code'] = $_G['cachedata_threadprofile_code'];

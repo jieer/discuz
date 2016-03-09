@@ -61,10 +61,15 @@ function output_preview() {
 	$content = ob_get_contents();
 	ob_end_clean();
 	ob_start();
-	$content = preg_replace("/\<a href=\"(.*?)\"[\s]?\>(.*?)\<\/a\>/e", "replace_href('\\2', '\\1')", $content);
+	$content = preg_replace_callback("/\<a href=\"(.*?)\"[\s]?\>(.*?)\<\/a\>/", 'output_preview_callback_replace_href_21', $content);
 	echo $content;
 	exit;
 }
+
+function output_preview_callback_replace_href_21($matches) {
+	return replace_href($matches[2], $matches[1]);
+}
+
 function replace_href($html_str, $other1, $other2) {
 	$string = "<span class='lkcss'>".stripslashes($html_str)."</span>";
 	return $string;

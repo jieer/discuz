@@ -583,7 +583,7 @@ function checkhook($currentdir, $ext = '', $sub = 1, $skip = '') {
 			} else {
 				$data = file_get_contents($file);
 				$hooks = array();
-				preg_replace("/\{hook\/(\w+?)(\s+(.+?))?\}/ie", "findhook('\\1', '\\3')", $data);
+				preg_replace_callback("/\{hook\/(\w+?)(\s+(.+?))?\}/i", 'checkhook_callback_findhook_13', $data);
 				if($hooks) {
 					foreach($hooks as $v) {
 						$hookdata[$file][$v][] = $v;
@@ -594,6 +594,10 @@ function checkhook($currentdir, $ext = '', $sub = 1, $skip = '') {
 	}
 }
 
+function checkhook_callback_findhook_13($matches) {
+	return findhook($matches[1], $matches[3]);
+}
+
 function findhook($hookid, $key) {
 	global $hooks;
 	if($key) {
@@ -601,4 +605,5 @@ function findhook($hookid, $key) {
 	}
 	$hooks[] = '<!--{hook/'.$hookid.$key.'}-->';
 }
+
 ?>

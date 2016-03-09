@@ -13,6 +13,8 @@ if(!defined('IN_DISCUZ')) {
 
 class table_forum_postcomment extends discuz_table
 {
+	private $cic_for_fetch_postcomment_by_pid;
+
 	public function __construct() {
 
 		$this->_table = 'forum_postcomment';
@@ -159,8 +161,8 @@ class table_forum_postcomment extends discuz_table
 				$comments[$comment['pid']][] = $comment;
 			}
 			if($comment['authorid'] == '-1') {
-				$cic = 0;
-				$totalcomment[$comment['pid']] = preg_replace('/<i>([\.\d]+)<\/i>/e', "'<i class=\"cmstarv\" style=\"background-position:20px -'.(intval(\\1) * 16).'px\">'.sprintf('%1.1f', \\1).'</i>'.(\$cic++ % 2 ? '<br />' : '');", $comment['comment']);
+				$this->cic_for_fetch_postcomment_by_pid = 0;
+				$totalcomment[$comment['pid']] = preg_replace_callback('/<i>([\.\d]+)<\/i>/', array($this, 'fetch_postcomment_by_pid_callback_1a'), $comment['comment']);
 			}
 			$postcache[$comment['pid']]['comment']['count'] = $commentcount[$comment['pid']];
 			$postcache[$comment['pid']]['comment']['data'] = $comments[$comment['pid']];
@@ -169,6 +171,9 @@ class table_forum_postcomment extends discuz_table
 		return array($comments, $postcache, $commentcount, $totalcomment);
 	}
 
+	public function fetch_postcomment_by_pid_callback_1a($matches) {
+		return '<i class="cmstarv" style="background-position:20px -'.(intval($matches[1]) * 16).'px">'.sprintf('%1.1f', $matches[1]).'</i>'.($this->cic_for_fetch_postcomment_by_pid++ % 2 ? '<br />' : '');
+	}
 }
 
 ?>

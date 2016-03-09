@@ -8,7 +8,9 @@
 */
 
 error_reporting(0);
-set_magic_quotes_runtime(0);
+if(PHP_VERSION < '5.3.0') {
+	set_magic_quotes_runtime(0);
+}
 
 $mtime = explode(' ', microtime());
 $starttime = $mtime[1] + $mtime[0];

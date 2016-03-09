@@ -52,12 +52,24 @@ function bat_highlight($message, $words, $color = '#ff0000') {
 			$specialextra = substr($message, $sppos + 3);
 			$message = substr($message, 0, $sppos);
 		}
-		$message = preg_replace(array("/(^|>)([^<]+)(?=<|$)/sUe", "/<highlight>(.*)<\/highlight>/siU"), array("highlight('\\2', \$highlightarray, '\\1')", "<strong><font color=\"$color\">\\1</font></strong>"), $message);
+		bat_highlight_callback_highlight_21a($highlightarray, 1);
+		$message = preg_replace("/<highlight>(.*)<\/highlight>/siU", "<strong><font color=\"$color\">\\1</font></strong>", $message);
+		$message = preg_replace_callback("/(^|>)([^<]+)(?=<|$)/sU", 'bat_highlight_callback_highlight_21a', $message);
 		if($sppos !== FALSE) {
 			$message = $message.chr(0).chr(0).chr(0).$specialextra;
 		}
 	}
 	return $message;
+}
+
+function bat_highlight_callback_highlight_21a($matches, $action = 0) {
+	static $highlightarray = array();
+
+	if($action == 1) {
+		$highlightarray = $matches;
+	} else {
+		return highlight($matches[2], $highlightarray, $matches[1]);
+	}
 }
 
 ?>

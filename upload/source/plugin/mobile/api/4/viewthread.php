@@ -192,7 +192,11 @@ class mobile_api {
 	}
 
 	function _findimg($string) {
-		return preg_replace('/(<img src=\")(.+?)(\".*?\>)/ise', "mobile_api::_parseimg('\\1', '\\2', '\\3')", $string);
+		return preg_replace_callback('/(<img src=\")(.+?)(\".*?\>)/is', array(__CLASS__, 'findimg_callback_parseimg_123'), $string);
+	}
+
+	static function findimg_callback_parseimg_123($matches) {
+		return mobile_api::_parseimg($matches[1], $matches[2], $matches[3]);
 	}
 
 	function _parseimg($before, $img, $after) {

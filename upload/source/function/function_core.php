@@ -825,21 +825,16 @@ function libfile($libname, $folder = '') {
 }
 
 function dstrlen($str) {
-	if(strtolower(CHARSET) != 'utf-8') {
-		return strlen($str);
-	}
-	$count = 0;
-	for($i = 0; $i < strlen($str); $i++){
-		$value = ord($str[$i]);
-		if($value > 127) {
-			$count++;
-			if($value >= 192 && $value <= 223) $i++;
-			elseif($value >= 224 && $value <= 239) $i = $i + 2;
-			elseif($value >= 240 && $value <= 247) $i = $i + 3;
-	    	}
-    		$count++;
-	}
-	return $count;
+    $charset = strtolower(CHARSET);
+    if(function_exists("mb_strlen")){
+        return mb_strlen($str,$charset);
+    }
+    $re['utf-8']   = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
+    $re['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
+    $re['gbk']    = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
+    $re['big5']   = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
+    preg_match_all($re[$charset], $str, $match);
+    return count($match[0]);
 }
 
 function cutstr($string, $length, $dot = ' ...') {
@@ -1086,7 +1081,9 @@ function output_replace($content) {
 			$_G['setting']['output']['preg']['replace'] = str_replace('{CURHOST}', $_G['siteurl'], $_G['setting']['output']['preg']['replace']);
 		}
 
-		$content = preg_replace($_G['setting']['output']['preg']['search'], $_G['setting']['output']['preg']['replace'], $content);
+		foreach ($_G['setting']['output']['preg']['search'] as $key => $value) {
+			$content = preg_replace_callback($value, create_function('$matches', 'return '.$_G['setting']['output']['preg']['replace'][$key].';'), $content);
+		}
 	}
 
 	return $content;
@@ -2096,12 +2093,10 @@ if(PHP_VERSION < '7.0.0') {
 	function dpreg_replace($pattern, $replacement, $subject, $limit = -1, &$count) {
 		return preg_replace($pattern, $replacement, $subject, $limit, $count);
 	}
-	else {
-		function dpreg_replace($pattern, $replacement, $subject, $limit = -1, &$count) {
-			require_once libfile('function/preg');
-			return _dpreg_replace($pattern, $replacement, $subject, $limit, $count);
-		}
+} else {
+	function dpreg_replace($pattern, $replacement, $subject, $limit = -1, &$count) {
+		require_once libfile('function/preg');
+		return _dpreg_replace($pattern, $replacement, $subject, $limit, $count);
 	}
 }
-
 ?>

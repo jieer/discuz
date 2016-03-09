@@ -19,7 +19,7 @@ class helper_mobile {
 		if(!defined('TPL_DEFAULT')) {
 			$content = ob_get_contents();
 			ob_end_clean();
-			$content = preg_replace("/href=\"(\w+\.php)(.*?)\"/e", "mobilereplace('\\1', '\\2')", $content);
+			$content = preg_replace_callback("/href=\"(\w+\.php)(.*?)\"/", array(__CLASS__, 'mobileoutput_callback_mobilereplace_12'), $content);
 
 			ob_start();
 			$content = '<?xml version="1.0" encoding="utf-8"?>'.$content;
@@ -47,7 +47,11 @@ class helper_mobile {
 		}
 	}
 
-	function mobilereplace($file, $replace) {
+	public static function mobileoutput_callback_mobilereplace_12($matches) {
+		return self::mobilereplace($matches[1], $matches[2]);
+	}
+
+	public static function mobilereplace($file, $replace) {
 		if(strpos($replace, 'mobile=') === false) {
 			if(strpos($replace, '?') === false) {
 				$replace = 'href="'.$file.$replace.'?mobile='.IN_MOBILE.'"';

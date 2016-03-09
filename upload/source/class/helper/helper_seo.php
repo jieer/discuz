@@ -91,14 +91,21 @@ class helper_seo {
 			}
 			if($searcharray && $replacearray) {
 				$_G['trunsform_tmp'] = array();
-				$content = preg_replace("/(<script\s+.*?>.*?<\/script>)|(<a\s+.*?>.*?<\/a>)|(<img\s+.*?[\/]?>)|(\[attach\](\d+)\[\/attach\])/ies", "helper_seo::base64_transform('encode', '<relatedlink>', '\\1\\2\\3\\4', '</relatedlink>')", $content);
+				$content = preg_replace_callback("/(<script\s+.*?>.*?<\/script>)|(<a\s+.*?>.*?<\/a>)|(<img\s+.*?[\/]?>)|(\[attach\](\d+)\[\/attach\])/is", array(__CLASS__, 'parse_related_link_callback_base64_transform_1234a'), $content);
 				$content = preg_replace($searcharray, $replacearray, $content, 1);
-				$content = preg_replace("/<relatedlink>(.*?)<\/relatedlink>/ies", "helper_seo::base64_transform('decode', '', '\\1', '')", $content);
+				$content = preg_replace_callback("/<relatedlink>(.*?)<\/relatedlink>/is", array(__CLASS__, 'parse_related_link_callback_base64_transform_1a'), $content);
 			}
 		}
 		return $content;
 	}
 
+	static public function parse_related_link_callback_base64_transform_1234a($matches) {
+		return self::base64_transform('encode', '<relatedlink>', $matches[1].$matches[2].$matches[3].$matches[4], '</relatedlink>');
+	}
+
+	static function parse_related_link_callback_base64_transform_1a($matches) {
+		return self::base64_transform('decode', '', $matches[1], '');
+	}
 
 	public static function base64_transform($type, $prefix, $string, $suffix) {
 		global $_G;

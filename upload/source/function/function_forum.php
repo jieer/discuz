@@ -94,7 +94,7 @@ function formulaperm($formula) {
 		foreach($a[1] as $field) {
 			switch($field) {
 				case 'regdate':
-					$formula = preg_replace("/\{(\d{4})\-(\d{1,2})\-(\d{1,2})\}/e", "'\'\\1-'.sprintf('%02d', '\\2').'-'.sprintf('%02d', '\\3').'\''", $formula);
+					$formula = preg_replace_callback("/\{(\d{4})\-(\d{1,2})\-(\d{1,2})\}/", 'formulaperm_callback_123a', $formula);
 				case 'regday':
 					break;
 				case 'regip':
@@ -170,6 +170,10 @@ function formulaperm($formula) {
 	return TRUE;
 }
 
+function formulaperm_callback_123a($matches) {
+	return '\''.$matches[1].'-'.sprintf('%02d', $matches[2]).'-'.sprintf('%02d', $matches[3]).'\'';
+}
+
 function medalformulaperm($formula, $type) {
 	global $_G;
 
@@ -197,7 +201,7 @@ function medalformulaperm($formula, $type) {
 		foreach($a[1] as $field) {
 			switch($field) {
 				case 'regdate':
-					$formula = preg_replace("/\{(\d{4})\-(\d{1,2})\-(\d{1,2})\}/e", "'\'\\1-'.sprintf('%02d', '\\2').'-'.sprintf('%02d', '\\3').'\''", $formula);
+					$formula = preg_replace_callback("/\{(\d{4})\-(\d{1,2})\-(\d{1,2})\}/", 'medalformulaperm_callback_123a', $formula);
 				case 'regday':
 					break;
 				case 'regip':
@@ -269,6 +273,10 @@ function medalformulaperm($formula, $type) {
 		return FALSE;
 	}
 	return TRUE;
+}
+
+function medalformulaperm_callback_123a($matches) {
+	return '\''.$matches[1].'-'.sprintf('%02d', $matches[2]).'-'.sprintf('%02d', $matches[3]).'\'';
 }
 
 function groupexpiry($terms) {

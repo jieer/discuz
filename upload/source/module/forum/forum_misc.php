@@ -249,6 +249,16 @@ if($_GET['action'] == 'paysucceed') {
 
 } elseif($_GET['action'] == 'commentmore') {
 
+	function forum_misc_commentmore_callback_1a($matches, $action = 0) {
+		static $cic = 0;
+
+		if($action == 1) {
+			$cic = $matches;
+		} else {
+			return '<i class="cmstarv" style="background-position:20px -'.(intval($matches[1]) * 16).'px">'.sprintf('%1.1f', $matches[1]).'</i>'.($cic++ % 2 ? '<br />' : '');
+		}
+	}
+
 	if(!$_G['setting']['commentnumber'] || !$_G['inajax']) {
 		showmessage('postcomment_closed');
 	}
@@ -263,9 +273,10 @@ if($_GET['action'] == 'paysucceed') {
 		$comment['comment'] = str_replace(array('[b]', '[/b]', '[/color]'), array('<b>', '</b>', '</font>'), preg_replace("/\[color=([#\w]+?)\]/i", "<font color=\"\\1\">", $comment['comment']));
 		$comments[] = $comment;
 	}
+	forum_misc_commentmore_callback_1a(0, 1);
 	$totalcomment = C::t('forum_postcomment')->fetch_standpoint_by_pid($_GET['pid']);
 	$totalcomment = $totalcomment['comment'];
-	$totalcomment = preg_replace('/<i>([\.\d]+)<\/i>/e', "'<i class=\"cmstarv\" style=\"background-position:20px -'.(intval(\\1) * 16).'px\">'.sprintf('%1.1f', \\1).'</i>'.(\$cic++ % 2 ? '<br />' : '');", $totalcomment);
+	$totalcomment = preg_replace_callback('/<i>([\.\d]+)<\/i>/', 'forum_misc_commentmore_callback_1a', $totalcomment);
 	$count = C::t('forum_postcomment')->count_by_search(null, $_GET['pid']);
 	$multi = multi($count, $commentlimit, $page, "forum.php?mod=misc&action=commentmore&tid=$_G[tid]&pid=$_GET[pid]");
 	include template('forum/comment_more');
@@ -1378,10 +1389,10 @@ if($_GET['action'] == 'votepoll' && submitcheck('pollsubmit', 1)) {
 		if(strlen($apply['message']) > 11 && is_numeric($apply['message'])) {
 			$apply['message'] = '['.$apply['message'].']';
 		}
+		$apply['message'] = str_replace(array("\r\n", "\r", "\n"), " ", $apply['message']);
 		$applylist[] = $apply;
 	}
 	$filename = "activity_{$_G[tid]}.csv";
-
 	include template('forum/activity_export');
 	$csvstr = ob_get_contents();
 	ob_end_clean();
