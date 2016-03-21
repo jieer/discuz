@@ -103,7 +103,7 @@ class task_post {
 			$endtime = $task['applytime'] + 3600 * $taskvars['time'];
 		}
 
-		$num = C::t('forum_post')->count_by_search(0, $threadid, null, 0, $forumid, $_G['uid'], null, $starttime, $endtime, null, $first);
+		$num = C::t('forum_post')->count_by_search('tid:'.$threadid, $threadid, null, 0, $forumid, $_G['uid'], null, $starttime, $endtime, null, $first);
 
 		if($num && $num >= $taskvars['num']) {
 			return TRUE;
