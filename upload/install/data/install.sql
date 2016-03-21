@@ -2658,6 +2658,15 @@ CREATE TABLE pre_forum_post (
   KEY `first` (tid,`first`)
 ) TYPE=MyISAM;
 
+DROP TABLE IF EXISTS pre_forum_postposition;
+CREATE TABLE `pre_forum_postposition` (
+  `tid` mediumint(8) unsigned NOT NULL,
+  `position` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `pid` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`tid`,`position`),
+  UNIQUE KEY `pid` (`pid`)
+) TYPE=MyISAM;
+
 DROP TABLE IF EXISTS pre_forum_post_location;
 CREATE TABLE pre_forum_post_location (
   pid int(10) unsigned NOT NULL DEFAULT '0',
