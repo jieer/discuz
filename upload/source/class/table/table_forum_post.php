@@ -604,6 +604,7 @@ class table_forum_post extends discuz_table
 	}
 
 	public function insert($tableid, $data, $return_insert_id = false, $replace = false, $silent = false) {
+		$data['position'] = C::t('forum_postposition')->insert($data['tid'], $data['pid']);
 		return DB::insert(self::get_tablename($tableid), $data, $return_insert_id, $replace, $silent);
 	}
 

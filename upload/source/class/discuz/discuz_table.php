@@ -47,7 +47,11 @@ class discuz_table extends discuz_base
 	}
 
 	public function count() {
-		$count = (int) DB::result_first("SELECT count(*) FROM ".DB::table($this->_table));
+		$count = 0;
+		$data = DB::fetch_first("SHOW TABLE STATUS LIKE '".DB::table($this->_table)."'");
+		if($data) {
+			$count = (int) $data['Rows'];
+		}
 		return $count;
 	}
 
